@@ -1,0 +1,88 @@
+name: Bug Report
+description: Report a bug or unexpected rendering in sphinx-mintlify-output
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! The fastest path to a fix
+        is a minimal reproducer — a small `conf.py` + one source file is
+        usually enough.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear description of the bug, including what you expected to happen.
+      placeholder: |
+        e.g. The `.. option::` directive renders as a Python signature instead of a <dl>.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal Source
+      description: |
+        A small reST/MyST snippet that triggers the bug. Include the relevant
+        bits of `conf.py` if behaviour depends on config.
+      render: rst
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-output
+    attributes:
+      label: Actual MDX Output
+      description: What `sphinx-build -b mintlify` produced.
+      render: mdx
+
+  - type: textarea
+    id: expected-output
+    attributes:
+      label: Expected MDX Output
+      description: What you think it should produce.
+      render: mdx
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      description: Which part of the rendering is broken?
+      options:
+        - Markdown core (headings / lists / inline)
+        - Tables
+        - Admonitions
+        - sphinx-design (card / tab-set / dropdown / grid)
+        - Autodoc (desc / param / response fields)
+        - CLI options / cmdoption
+        - Footnotes / citations
+        - Images / figures
+        - Math / raw HTML
+        - Toctree / navigation / docs.json
+        - Frontmatter
+        - Build failure / crash
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Output of:
+        ```sh
+        uv run python -c "import sphinx_mintlify_output, sphinx, sys; print(sphinx_mintlify_output.__version__, sphinx.__version__, sys.version)"
+        ```
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Sphinx build output, especially warnings or tracebacks. Use `sphinx-build -v` for verbose output.
+      render: shell

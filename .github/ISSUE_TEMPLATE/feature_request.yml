@@ -1,0 +1,78 @@
+name: Feature Request
+description: Suggest a new docutils node, Mintlify component mapping, or config knob
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe your idea below.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What docutils construct, Sphinx feature, or Mintlify component is not supported today? What are you trying to achieve?
+      placeholder: I want to be able to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: What output would you expect? If it maps to a specific Mintlify component, link the component docs.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What area of sphinx-mintlify-output does this relate to?
+      options:
+        - New docutils node mapping
+        - New Mintlify component
+        - Override existing mapping (mintlify_component_map)
+        - docs.json / navigation
+        - Frontmatter
+        - Asset handling (images / SVG / base64)
+        - Autodoc
+        - Performance
+        - Developer experience
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: example-source
+    attributes:
+      label: Example Source
+      description: A small reST/MyST snippet showing the input you'd write.
+      render: rst
+
+  - type: textarea
+    id: example-output
+    attributes:
+      label: Example MDX Output
+      description: What the rendered MDX would look like.
+      render: mdx
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Workarounds you tried, related Sphinx extensions, etc.
+
+  - type: dropdown
+    id: importance
+    attributes:
+      label: Importance
+      description: How important is this feature to your workflow?
+      options:
+        - Nice to have
+        - Would improve my workflow
+        - Critical for my use case
+    validations:
+      required: true

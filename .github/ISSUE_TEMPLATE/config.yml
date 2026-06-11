@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability
+    url: https://github.com/nebius/sphinx-mintlify-output/security/advisories/new
+    about: Report security vulnerabilities privately through GitHub Security Advisories
+  - name: Mintlify documentation
+    url: https://mintlify.com/docs
+    about: Look up Mintlify component shapes / docs.json schema before reporting
+  - name: Sphinx documentation
+    url: https://www.sphinx-doc.org/en/master/
+    about: Read the Sphinx docs for general questions about reST / autodoc / extensions
