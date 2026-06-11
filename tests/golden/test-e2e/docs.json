@@ -1,0 +1,19 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "E2E Docs",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Guides",
+        "pages": [
+          "intro",
+          "advanced"
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "static/favicon.ico"
+  }
+}

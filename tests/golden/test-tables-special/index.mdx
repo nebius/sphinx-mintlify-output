@@ -1,0 +1,50 @@
+---
+title: Tables with special characters
+---
+
+<a id="gfm-table-with-pipes"></a>
+
+## GFM table with pipes
+
+| Symbol | Meaning |
+|---|---|
+| `a \| b` | logical or |
+| `c & d` | logical and |
+| `e < f` | less than |
+
+<a id="gfm-table-with-html-ish-text"></a>
+
+## GFM table with HTML-ish text
+
+| Tag | Note |
+|---|---|
+| tag \<strong\> | keep literal |
+| amp & co | ampersand |
+
+<a id="complex-table-with-special-chars"></a>
+
+## Complex table with special chars
+
+<table>
+  <thead>
+    <tr>
+      <th>Col</th>
+      <th>Val</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>A</td>
+      <td>x | y</td>
+    </tr>
+    <tr>
+      <td>B</td>
+      <td>a & b \< c</td>
+    </tr>
+    <tr>
+      <td>C</td>
+      <td>one
+two</td>
+    </tr>
+  </tbody>
+</table>

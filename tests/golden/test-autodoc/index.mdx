@@ -1,0 +1,71 @@
+---
+title: API
+---
+
+<a id="example.Greeter"></a>
+
+## `class Greeter`
+
+```python
+class example.Greeter(name, polite)
+```
+
+A friendly greeter.
+
+<ParamField path="name" type="str" required>
+The display name of the greeter.
+</ParamField>
+
+<ParamField path="polite" type="bool" default="True">
+Whether to use polite forms.
+</ParamField>
+
+<div className="pl-4 ml-1 my-4">
+
+### Methods
+
+<a id="example.Greeter.greet"></a>
+
+#### `greet()`
+
+```python
+def greet(target) -> str
+```
+
+Greet a target.
+
+<ParamField path="target" type="str" required>
+Who to greet.
+</ParamField>
+
+<ResponseField name="returns">
+A greeting string.
+</ResponseField>
+
+<ResponseField name="raises">
+**ValueError** – If target is empty.
+</ResponseField>
+
+</div>
+
+<a id="example.add"></a>
+
+## `add()`
+
+```python
+def example.add(a, b) -> int
+```
+
+Add two integers.
+
+<ParamField path="a" type="int" required>
+First number.
+</ParamField>
+
+<ParamField path="b" type="int" required>
+Second number.
+</ParamField>
+
+<ResponseField name="returns">
+The sum.
+</ResponseField>

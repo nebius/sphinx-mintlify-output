@@ -1,0 +1,32 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Nav Docs",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get started",
+        "pages": [
+          "tutorial/quickstart",
+          "tutorial/install"
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": [
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/index",
+              "reference/commands",
+              "reference/options"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "colors": {
+    "primary": "#0d9373"
+  }
+}

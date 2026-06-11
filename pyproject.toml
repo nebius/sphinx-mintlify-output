@@ -1,0 +1,72 @@
+[project]
+name = "sphinx-mintlify-output"
+version = "0.1.0"
+description = "Sphinx builder that emits Mintlify-compatible MDX and docs.json"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Dmitry Orlov", email = "mosquito@nebius.com"},
+]
+keywords = ["sphinx", "mintlify", "mdx", "documentation", "builder"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Sphinx",
+    "Framework :: Sphinx :: Extension",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Documentation :: Sphinx",
+    "Typing :: Typed",
+]
+dependencies = [
+    "sphinx>=7.0",
+]
+
+[project.entry-points."sphinx.builders"]
+mintlify = "sphinx_mintlify_output.builder"
+
+[build-system]
+requires = ["uv_build>=0.10.4,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "sphinx_mintlify_output"
+module-root = ""
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "ruff",
+    "myst-parser",
+    "sphinx-design",
+    "types-docutils",
+    "pyyaml",
+    "types-pyyaml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+disallow_subclassing_any = false
+
+[[tool.mypy.overrides]]
+module = ["sphinx.*"]
+follow_imports = "skip"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]

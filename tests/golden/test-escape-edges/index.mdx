@@ -1,0 +1,24 @@
+---
+title: Edge cases for MDX/JSX/Markdown escaping
+---
+
+External link with special characters: [Search “X & Y”](https://example.com/?q=X%20%26%20Y).
+
+An image with quotes in alt text:
+
+![A "dotted" line & arrow](/images/dot.png)
+
+A figure with HTML-ish caption:
+
+<Frame caption="Caption with &lt;angle&gt; &amp; “quoted” text.">
+![Dot](/images/dot.png)</Frame>
+
+<Tabs>
+<Tab title="a &gt; b “best”">
+Tab body.
+</Tab>
+</Tabs>
+
+<Card title="A &amp; B “the rest”">
+Card body content.
+</Card>
