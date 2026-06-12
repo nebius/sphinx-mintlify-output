@@ -2,6 +2,9 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Nav Docs",
+  "colors": {
+    "primary": "#0d9373"
+  },
   "navigation": {
     "groups": [
       {
@@ -25,8 +28,5 @@
         ]
       }
     ]
-  },
-  "colors": {
-    "primary": "#0d9373"
   }
 }

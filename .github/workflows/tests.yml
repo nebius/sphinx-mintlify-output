@@ -79,3 +79,35 @@ jobs:
 
       - name: Run tests
         run: uv run pytest -v --tb=short
+
+  integration:
+    name: Integration (mintlify dev)
+    # Linux only: macOS/Windows runners pay extra minutes and the
+    # Mintlify CLI behaves identically across platforms, so a single
+    # Linux job is enough confidence.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ env.DEFAULT_PYTHON }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Run integration tests
+        # Opt-in marker excluded from the regular `test` job; spawns
+        # `npx mintlify dev` twice (relative + prefixed URL modes) and
+        # verifies the served HTML/asset content end-to-end.
+        run: uv run pytest -m integration -v --tb=short

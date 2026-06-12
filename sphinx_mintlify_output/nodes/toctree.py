@@ -14,6 +14,7 @@ from docutils import nodes
 from sphinx_mintlify_output.escaping import escape_attr
 from sphinx_mintlify_output.nodes.base import TranslationNode
 from sphinx_mintlify_output.toctree import doc_summary, doc_title_or_slug
+from sphinx_mintlify_output.urls import url_for
 
 
 class ToctreeNode(TranslationNode):
@@ -29,7 +30,8 @@ class ToctreeNode(TranslationNode):
                 continue
             label = (title or "").strip() or doc_title_or_slug(env, docname)
             description = doc_summary(env, docname)
-            cards.append((label, "/" + docname, description))
+            href = url_for(self.ctx.docname, docname)
+            cards.append((label, href, description))
         if not cards:
             return ""
         return _render_toctree_cards(caption, cards)
@@ -56,8 +58,10 @@ class CompoundNode(TranslationNode):
             if not (title and refuri) or refuri in seen:
                 continue
             seen.add(refuri)
-            href = refuri if refuri.startswith(("/", "http", "#")) else "/" + refuri
-            cards.append((title, href, ""))
+            # ``refuri`` already comes from ``MintlifyBuilder.get_relative_uri``,
+            # so it's either an absolute URL (``/path`` or ``http(s)://``),
+            # a fragment, or a relative slug — emit it verbatim either way.
+            cards.append((title, refuri, ""))
         if not cards:
             return ""
         return _render_toctree_cards(caption, cards)

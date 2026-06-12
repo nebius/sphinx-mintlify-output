@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import os
+import posixpath
 from os import path
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, ClassVar
 
 from docutils import nodes
@@ -12,6 +14,7 @@ from sphinx.builders import Builder
 from sphinx.util import logging
 from sphinx.util.osutil import ensuredir
 
+from sphinx_mintlify_output import urls
 from sphinx_mintlify_output.navigation import build_docs_json
 from sphinx_mintlify_output.nodes import TranslationContext, TranslationNode
 
@@ -83,10 +86,35 @@ class MintlifyBuilder(Builder):
                 yield docname
 
     def get_target_uri(self, docname: str, typ: str | None = None) -> str:
-        return "/" + docname
+        base = self.base_path
+        if base is not None:
+            return str(base / docname)
+        return docname
 
     def get_relative_uri(self, from_: str, to: str, typ: str | None = None) -> str:
-        return self.get_target_uri(to, typ)
+        base = self.base_path
+        if base is not None:
+            return str(base / to)
+        from_dir = posixpath.dirname(from_)
+        if not from_dir:
+            return to
+        return posixpath.relpath(to, from_dir)
+
+    @property
+    def base_path(self) -> PurePosixPath | None:
+        """Mount-point for generated URLs (``mintlify_base_path``).
+
+        ``None`` (default) → emit Sphinx-style relative links that work
+        under any deployment prefix.
+
+        ``PurePosixPath("/sandboxes/sdk")`` → emit absolute links
+        rooted at that prefix; useful when the build embeds into a
+        larger Mintlify site that uses absolute paths elsewhere.
+        """
+        raw = self.config.mintlify_base_path or ""
+        if not raw.strip():
+            return None
+        return PurePosixPath("/", raw)
 
     def prepare_writing(self, docnames: set[str]) -> None:
         return None
@@ -95,8 +123,15 @@ class MintlifyBuilder(Builder):
         self.post_process_images(doctree)
         inject_hidden_toctrees(self, docname, doctree)
         ctx = TranslationContext(builder=self, docname=docname)
-        root = TranslationNode.from_docutils(doctree, parent=None, ctx=ctx)
-        body = root.render()
+        # Publish base_path on the contextvar so url_for() throughout
+        # the node tree picks the right mode without needing the
+        # builder threaded through every helper.
+        token = urls.base_path.set(self.base_path)
+        try:
+            root = TranslationNode.from_docutils(doctree, parent=None, ctx=ctx)
+            body = root.render()
+        finally:
+            urls.base_path.reset(token)
         outfilename = path.join(self.outdir, docname + self.out_suffix)
         ensuredir(path.dirname(outfilename))
         # Fail loud: a missing/half-written page is a build error, not a

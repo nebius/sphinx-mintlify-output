@@ -23,6 +23,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
     app.add_config_value("mintlify_component_map", {}, "env")
     app.add_config_value("mintlify_emit_anchors", True, "env")
     app.add_config_value("mintlify_externalize_assets", True, "env")
+    app.add_config_value("mintlify_base_path", "", "env")
     return {
         "version": __version__,
         "parallel_read_safe": True,

@@ -49,16 +49,28 @@ def build_docs_json(env: BuildEnvironment, config: Config) -> dict[str, Any]:
         navigation["pages"] = [*bare_pages, *combined_groups]
 
     project_name = getattr(config, "project", "Documentation")
+    # Mintlify's docs.json schema requires `colors` (with at least a
+    # `primary` value) and `name`/`navigation`. Provide neutral defaults
+    # so `mintlify dev` accepts the build out of the box; user overrides
+    # from `mintlify_docs_json` take precedence below.
     result: dict[str, Any] = {
         "$schema": "https://mintlify.com/docs.json",
         "theme": "mint",
         "name": project_name,
+        "colors": {"primary": "#0d9373"},
         "navigation": navigation,
     }
 
     user_extra = dict(config.mintlify_docs_json or {})
     user_nav = user_extra.pop("navigation", None)
+    user_colors = user_extra.pop("colors", None)
     result.update(user_extra)
+    if user_colors is not None:
+        # Merge so a user supplying only e.g. `{"primary": "#abc"}` still
+        # keeps any other defaults rather than wiping the section.
+        merged_colors = dict(result["colors"])
+        merged_colors.update(user_colors)
+        result["colors"] = merged_colors
     if user_nav is not None:
         result["navigation"] = user_nav
     return result

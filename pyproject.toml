@@ -55,6 +55,13 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Custom marker for end-to-end tests that need the real Mintlify CLI
+# (Node.js + npx). Excluded from default runs because they're slow
+# (~30s startup) and need network access on first invocation.
+markers = [
+    "integration: opt-in tests that spawn `npx mintlify dev` (run with `-m integration`)",
+]
+addopts = "-m 'not integration'"
 
 [tool.mypy]
 strict = true

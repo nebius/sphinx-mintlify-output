@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
+import posixpath
+
 from docutils import nodes
 
-from sphinx_mintlify_output.assets import relative_image_path
 from sphinx_mintlify_output.escaping import (
     escape_attr,
     escape_md_link_text,
     escape_md_url,
 )
 from sphinx_mintlify_output.nodes.base import TranslationNode
+from sphinx_mintlify_output.urls import url_for
 
 
 class ImageNode(TranslationNode):
@@ -22,7 +24,7 @@ class ImageNode(TranslationNode):
         builder = self.ctx.builder
         canonical = builder.images.get(uri, uri)
         image_dir = builder.config.mintlify_image_dir
-        target = relative_image_path(self.ctx.docname, image_dir, canonical)
+        target = url_for(self.ctx.docname, posixpath.join(image_dir, canonical))
         width = self.node.get("width")
         height = self.node.get("height")
         if width or height:

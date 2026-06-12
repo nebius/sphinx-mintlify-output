@@ -20,6 +20,8 @@ import os
 import posixpath
 import re
 
+from sphinx_mintlify_output.urls import url_for
+
 SVG_BLOCK_RE = re.compile(r"<svg\b[^>]*>.*?</svg>", re.DOTALL | re.IGNORECASE)
 DATA_URI_RE = re.compile(
     r"data:image/(?P<mime>png|jpeg|jpg|gif|svg\+xml|webp);base64,"
@@ -37,7 +39,11 @@ MIME_EXT: dict[str, str] = {
 
 
 def externalize_inline_assets(
-    html: str, *, outdir: str, image_dir: str, from_doc: str
+    html: str,
+    *,
+    outdir: str,
+    image_dir: str,
+    from_doc: str,
 ) -> str:
     """Replace inline SVG and base64 data: URIs with file references.
 
@@ -45,7 +51,9 @@ def externalize_inline_assets(
     replaced with ``<img>`` tags. ``data:image/<mime>;base64,…`` payloads
     inside larger HTML (typically inside ``<img src="…">``) are written
     using the inferred extension and only the URI is replaced. Other HTML
-    passes through untouched.
+    passes through untouched. URLs are produced via
+    :func:`~sphinx_mintlify_output.urls.url_for` so they respect the
+    relative/absolute mode for the current build.
     """
 
     def replace_svg_block(match: re.Match[str]) -> str:
@@ -98,8 +106,4 @@ def write_asset_file(
     if not os.path.exists(target):
         with open(target, "wb") as fp:
             fp.write(content)
-    return relative_image_path(from_doc, image_dir, filename)
-
-
-def relative_image_path(from_doc: str, image_dir: str, name: str) -> str:
-    return "/" + posixpath.join(image_dir, name)
+    return url_for(from_doc, posixpath.join(image_dir, filename))

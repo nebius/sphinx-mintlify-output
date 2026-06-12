@@ -2,5 +2,8 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Autodoc",
+  "colors": {
+    "primary": "#0d9373"
+  },
   "navigation": {}
 }
