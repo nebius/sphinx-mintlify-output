@@ -1,3 +1,5 @@
+:icon: box
+
 Product
 =======
 

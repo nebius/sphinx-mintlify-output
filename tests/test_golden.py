@@ -40,7 +40,13 @@ def _iter_relative(out_dir: Path) -> list[Path]:
         if not p.is_file():
             continue
         rel = p.relative_to(out_dir)
-        if any(part == ".doctrees" for part in rel.parts):
+        if any(
+            part == ".doctrees"
+            or part == "_sphinx_design_static"
+            or part == "_sphinx_inline_tabs_static"
+            or part == "static"
+            for part in rel.parts
+        ):
             continue
         out.append(rel)
     return sorted(out)

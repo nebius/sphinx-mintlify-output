@@ -1,5 +1,19 @@
+:icon: code
+
 API
 ===
+
+.. tab:: Async
+
+   .. code-block:: python
+
+      await add(1, 2)
+
+.. tab:: Sync
+
+   .. code-block:: python
+
+      add(1, 2)
 
 .. toctree::
    :hidden:

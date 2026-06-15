@@ -48,6 +48,7 @@ dev = [
     "ruff",
     "myst-parser",
     "sphinx-design",
+    "sphinx-inline-tabs",
     "types-docutils",
     "pyyaml",
     "types-pyyaml",

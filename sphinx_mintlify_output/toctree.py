@@ -12,6 +12,11 @@ from typing import Any
 
 def doc_title(env: Any, docname: str) -> str | None:
     """Return the raw title text for ``docname``, or ``None`` if unset."""
+    metadata = getattr(env, "metadata", {}) or {}
+    meta = metadata.get(docname) or {}
+    if "title" in meta:
+        return str(meta["title"]).strip() or None
+
     titles = getattr(env, "titles", {}) or {}
     node = titles.get(docname)
     if node is None:

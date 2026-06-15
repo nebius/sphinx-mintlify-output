@@ -63,7 +63,15 @@ def build_one(src: Path, dst: Path) -> None:
         if dst.exists():
             shutil.rmtree(dst)
         shutil.copytree(
-            out, dst, ignore=shutil.ignore_patterns(".doctrees", "*.pickle")
+            out,
+            dst,
+            ignore=shutil.ignore_patterns(
+                ".doctrees",
+                "*.pickle",
+                "_sphinx_design_static",
+                "_sphinx_inline_tabs_static",
+                "static",
+            ),
         )
 
 

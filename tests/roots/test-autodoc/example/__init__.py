@@ -9,6 +9,7 @@ from example.catalog.product import Product
 class Greeter:
     """A friendly greeter.
 
+    :icon: hand-wave
     :param name: The display name of the greeter.
     :param polite: Whether to use polite forms.
     """

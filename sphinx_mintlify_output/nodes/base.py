@@ -176,6 +176,13 @@ class DocumentNode(TranslationNode):
             for cid in citation.get("ids") or []:
                 self.ctx.citation_ids.add(cid)
 
+        metadata = getattr(self.ctx.builder.env, "metadata", {}).get(
+            self.ctx.docname, {}
+        )
+        for key in ("description", "icon", "title"):
+            if key in metadata and key not in self.ctx.frontmatter:
+                self.ctx.frontmatter[key] = metadata[key]
+
         body = self.render_children().strip("\n")
         from sphinx_mintlify_output.frontmatter import render_frontmatter
 

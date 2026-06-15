@@ -39,19 +39,28 @@ def test_static_copied_css_skipped(app) -> None:
 @pytest.mark.sphinx("mintlify", testroot="e2e")
 def test_global_frontmatter_applied(app) -> None:
     app.build()
+    text = (Path(app.outdir) / "intro.mdx").read_text("utf-8")
+    assert "icon: book-open-cover" in text
+
+
+@pytest.mark.sphinx("mintlify", testroot="e2e")
+def test_page_metadata_overrides_frontmatter(app) -> None:
+    app.build()
     text = (Path(app.outdir) / "advanced.mdx").read_text("utf-8")
-    assert "icon: book" in text
+    assert "icon: user-astronaut" in text
+    assert "description: An advanced guide" in text
     assert "title: Advanced" in text
 
-    @pytest.mark.sphinx("mintlify", testroot="e2e")
-    def test_cross_doc_links_relative(app) -> None:
-        """Top-level pages link to each other via plain slugs (no leading /)."""
-        app.build()
-        intro = (Path(app.outdir) / "intro.mdx").read_text("utf-8")
-        assert "](./index)" in intro
 
-        index = (Path(app.outdir) / "index.mdx").read_text("utf-8")
-        assert "](./intro)" in index
-        # No absolute fall-through.
-        assert "](/intro)" not in index
-        assert "](/index)" not in intro
+@pytest.mark.sphinx("mintlify", testroot="e2e")
+def test_cross_doc_links_relative(app) -> None:
+    """Top-level pages link to each other via plain slugs (no leading /)."""
+    app.build()
+    intro = (Path(app.outdir) / "intro.mdx").read_text("utf-8")
+    assert "](./index)" in intro
+
+    index = (Path(app.outdir) / "index.mdx").read_text("utf-8")
+    assert "](./intro)" in index
+    # No absolute fall-through.
+    assert "](/intro)" not in index
+    assert "](/index)" not in intro

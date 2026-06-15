@@ -1,3 +1,5 @@
+:icon: cart-shopping
+
 Cart
 ====
 
