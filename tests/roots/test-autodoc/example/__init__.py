@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from example.nested.config import Config
+from example.nested.settings import Settings
+
 
 class Greeter:
     """A friendly greeter.
@@ -9,6 +12,11 @@ class Greeter:
     :param name: The display name of the greeter.
     :param polite: Whether to use polite forms.
     """
+
+    config: Config
+    """Current client configuration."""
+    settings: Settings
+    """Active settings."""
 
     def __init__(self, name: str, polite: bool = True) -> None:
         self.name = name

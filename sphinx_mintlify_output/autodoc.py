@@ -20,6 +20,7 @@ from typing import Any
 from docutils import nodes
 
 from sphinx_mintlify_output.state import ParamInfo
+from sphinx_mintlify_output.urls import base_path as mintlify_base_path_var
 
 
 def desc_short_name(signature: nodes.Element) -> str:
@@ -268,6 +269,8 @@ def link_types_in_string(type_str: str, env: Any) -> str:
     if not type_str:
         return ""
 
+    prefix = str(mintlify_base_path_var.get() or "")
+
     def replace(match: re.Match[str]) -> str:
         token = match.group(1)
         if token in BUILTIN_TYPE_NAMES:
@@ -276,7 +279,7 @@ def link_types_in_string(type_str: str, env: Any) -> str:
         if ref is None:
             return token
         docname, anchor = ref
-        href = "/" + docname
+        href = f"{prefix}/{docname}"
         if anchor:
             href = href + "#" + anchor
         return f"[`{token}`]({href})"
