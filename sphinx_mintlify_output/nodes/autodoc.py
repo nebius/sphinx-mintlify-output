@@ -241,7 +241,7 @@ def _render_desc_as_field(host: TranslationNode, node: nodes.Element) -> str:
     if type_str:
         attrs.append(f'type="{escape_attr(type_str)}"')
     body_parts: list[str] = []
-    type_links = link_types_in_string(type_str, host.ctx.builder.env)
+    type_links = link_types_in_string(type_str, host.ctx.docname, host.ctx.builder.env)
     if type_links and "](" in type_links:
         body_parts.append(type_links)
     if body:
@@ -466,7 +466,7 @@ def _render_one_param_field(
     elif default:
         attrs.append(f'default="{escape_attr(default)}"')
     body_parts: list[str] = []
-    type_links = link_types_in_string(type_str, host.ctx.builder.env)
+    type_links = link_types_in_string(type_str, host.ctx.docname, host.ctx.builder.env)
     if type_links and "](" in type_links:
         body_parts.append(type_links)
     if description and description.strip():
@@ -490,7 +490,7 @@ def _render_response_field(
     if type_str:
         attrs.append(f'type="{escape_attr(type_str)}"')
     body_parts: list[str] = []
-    type_links = link_types_in_string(type_str, host.ctx.builder.env)
+    type_links = link_types_in_string(type_str, host.ctx.docname, host.ctx.builder.env)
     if type_links and "](" in type_links:
         body_parts.append(type_links)
     if rendered:

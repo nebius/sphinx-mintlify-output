@@ -47,6 +47,9 @@ def url_for(from_doc: str, target: str) -> str:
     if base is not None:
         return str(base / target_clean)
     from_dir = posixpath.dirname(from_doc)
-    if not from_dir:
-        return target_clean
-    return posixpath.relpath(target_clean, from_dir)
+    rel = target_clean if not from_dir else posixpath.relpath(target_clean, from_dir)
+
+    if not rel.startswith((".", "/")):
+        rel = f"./{rel}"
+
+    return rel

@@ -86,6 +86,8 @@ def test_golden_corpus_matches(
     from sphinx.testing.fixtures import SphinxTestApp
 
     src = ROOTS_DIR / f"test-{testroot}"
+    if (src / "docs").is_dir() and (src / "docs" / "conf.py").is_file():
+        src = src / "docs"
     out = tmp_path / "build"
     app = SphinxTestApp(buildername="mintlify", srcdir=src, builddir=out)  # type: ignore[arg-type]
     try:

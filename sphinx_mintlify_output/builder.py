@@ -96,9 +96,10 @@ class MintlifyBuilder(Builder):
         if base is not None:
             return str(base / to)
         from_dir = posixpath.dirname(from_)
-        if not from_dir:
-            return to
-        return posixpath.relpath(to, from_dir)
+        rel = to if not from_dir else posixpath.relpath(to, from_dir)
+        if not rel.startswith((".", "/")):
+            rel = f"./{rel}"
+        return rel
 
     @property
     def base_path(self) -> PurePosixPath | None:

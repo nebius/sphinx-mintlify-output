@@ -16,7 +16,7 @@ def test_standalone_svg_externalized(app) -> None:
     assert "xml:space" not in text
     # Default URL mode is relative — the externalised SVG sits at
     # ``images/raw-...`` relative to the current page.
-    assert 'src="images/raw-' in text
+    assert 'src="./images/raw-' in text
     svgs = list((out / "images").glob("raw-*.svg"))
     assert len(svgs) == 1
     content = svgs[0].read_text("utf-8")

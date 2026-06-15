@@ -27,8 +27,18 @@ def list_test_roots() -> list[Path]:
     )
 
 
+def ensure_conf_py(src: Path) -> Path:
+    if (src / "conf.py").is_file():
+        return src
+    elif (src / "docs" / "conf.py").is_file():
+        return src / "docs"
+    else:
+        raise ValueError(f"No conf.py found in {src}")
+
+
 def build_one(src: Path, dst: Path) -> None:
     name = src.name
+    src = ensure_conf_py(src)
     with tempfile.TemporaryDirectory(prefix=f"mintlify-golden-{name}-") as tmp:
         out = Path(tmp) / "build"
         result = subprocess.run(

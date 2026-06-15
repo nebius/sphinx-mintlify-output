@@ -4,8 +4,9 @@ API
 .. toctree::
    :hidden:
 
-   nested/config
-   nested/settings
+   catalog/product
+   catalog/category
+   orders/cart
 
 .. autoclass:: example.Greeter
    :members:

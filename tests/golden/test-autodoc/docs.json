@@ -7,8 +7,9 @@
   },
   "navigation": {
     "pages": [
-      "nested/config",
-      "nested/settings"
+      "catalog/product",
+      "catalog/category",
+      "orders/cart"
     ]
   }
 }
