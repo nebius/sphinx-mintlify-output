@@ -52,3 +52,18 @@ def test_back_link_from_subpage_prefixed(app) -> None:
     app.build()
     text = (Path(app.outdir) / "intro.mdx").read_text("utf-8")
     assert "(/sandboxes/sdk/index)" in text
+
+
+@pytest.mark.sphinx(
+    "mintlify",
+    testroot="autodoc",
+    confoverrides={"mintlify_base_path": "/sandboxes/sdk"},
+)
+def test_autodoc_type_link_prefixed(app) -> None:
+    app.build()
+    index = (Path(app.outdir) / "index.mdx").read_text("utf-8")
+    settings = (Path(app.outdir) / "nested/settings.mdx").read_text("utf-8")
+    assert "(/sandboxes/sdk/nested/config#example.nested.config.Config)" in index
+    assert "(/sandboxes/sdk/nested/settings#example.nested.settings.Settings)" in index
+    assert 'href="/sandboxes/sdk/nested/settings"' in index
+    assert "(/sandboxes/sdk/nested/config#example.nested.config.Config)" in settings

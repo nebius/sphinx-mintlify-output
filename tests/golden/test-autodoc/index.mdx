@@ -22,6 +22,22 @@ Whether to use polite forms.
 
 <div className="pl-4 ml-1 my-4">
 
+### Attributes
+
+<a id="example.Greeter.config"></a>
+<ResponseField name="config" type="Config">
+[`Config`](/nested/config#example.nested.config.Config)
+
+Current client configuration.
+</ResponseField>
+
+<a id="example.Greeter.settings"></a>
+<ResponseField name="settings" type="Settings">
+[`Settings`](/nested/settings#example.nested.settings.Settings)
+
+Active settings.
+</ResponseField>
+
 ### Methods
 
 <a id="example.Greeter.greet"></a>
@@ -69,3 +85,10 @@ Second number.
 <ResponseField name="returns">
 The sum.
 </ResponseField>
+
+<Columns cols={2}>
+  <Card title="Config" href="nested/config">
+  </Card>
+  <Card title="Settings" href="nested/settings">
+  </Card>
+</Columns>
