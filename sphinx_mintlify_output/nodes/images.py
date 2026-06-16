@@ -47,7 +47,11 @@ class ImageNode(TranslationNode):
 
     def _is_block(self) -> bool:
         parent = self.node.parent
-        return parent is not None and not isinstance(parent, nodes.paragraph)
+        if parent is None:
+            return True
+        # Images used as link text (e.g. shields.io badges) sit directly under
+        # reference nodes rather than paragraphs.
+        return not isinstance(parent, nodes.paragraph | nodes.reference)
 
 
 class FigureNode(TranslationNode):

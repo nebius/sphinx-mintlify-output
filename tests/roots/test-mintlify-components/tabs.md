@@ -1,6 +1,4 @@
----
-title: Tab variations
----
+# Tab variations
 
 ## Text tabs
 

@@ -53,6 +53,14 @@ def test_page_metadata_overrides_frontmatter(app) -> None:
 
 
 @pytest.mark.sphinx("mintlify", testroot="e2e")
+def test_toctree_card_uses_page_icon(app) -> None:
+    app.build()
+    text = (Path(app.outdir) / "index.mdx").read_text("utf-8")
+    assert '<Card title="Advanced" href="./advanced" icon="user-astronaut">' in text
+    assert '<Card title="Introduction" href="./intro">' in text
+
+
+@pytest.mark.sphinx("mintlify", testroot="e2e")
 def test_cross_doc_links_relative(app) -> None:
     """Top-level pages link to each other via plain slugs (no leading /)."""
     app.build()

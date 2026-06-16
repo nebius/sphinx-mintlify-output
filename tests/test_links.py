@@ -39,6 +39,15 @@ def test_figure_wraps_in_frame(app) -> None:
 
 
 @pytest.mark.sphinx("mintlify", testroot="links")
+def test_linked_badge_image_stays_inline(app) -> None:
+    """Image link text must not get block-level blank lines inside the wrapper."""
+    app.build()
+    text = (Path(app.outdir) / "badges.mdx").read_text("utf-8")
+    assert "[![Logo](./images/logo.png)](https://example.com)" in text
+    assert "](./images/logo.png)\n\n](" not in text
+
+
+@pytest.mark.sphinx("mintlify", testroot="links")
 def test_images_copied(app) -> None:
     app.build()
     out = Path(app.outdir)

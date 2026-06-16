@@ -52,7 +52,7 @@ Point Mintlify at `out/mintlify`. Done.
 | `mintlify_image_dir` | `"images"` | Where images land relative to outdir |
 | `mintlify_frontmatter` | `{}` | Default frontmatter merged into every page |
 | `mintlify_component_map` | `{}` | Override admonition → component mappings |
-| `mintlify_emit_anchors` | `True` | Emit `<a id>` anchors before headings |
+| `mintlify_emit_anchors` | `True` | Emit `<a id>` anchors for autodoc entries and explicit targets (not section headings — Mintlify derives those from markdown) |
 | `mintlify_externalize_assets` | `True` | Pull inline SVG / base64 image URIs into `images/` and reference them by path |
 | `mintlify_base_path` | `""` | URL mount-point. Empty (default) → Sphinx-style **relative** links (`../intro`, `images/foo.png`) that work under any deployment prefix. Set to e.g. `"/sandboxes/sdk"` to force **absolute** links rooted at that prefix when embedding into a larger Mintlify site that uses absolute paths everywhere |
 
