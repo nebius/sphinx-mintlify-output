@@ -9,5 +9,5 @@ mintlify_docs_json = {
     "logo": {"light": "static/favicon.ico"},
 }
 mintlify_frontmatter = {
-    "icon": "book",
+    "icon": "book-open-cover",
 }

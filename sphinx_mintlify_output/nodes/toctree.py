@@ -13,7 +13,12 @@ from docutils import nodes
 
 from sphinx_mintlify_output.escaping import escape_attr
 from sphinx_mintlify_output.nodes.base import TranslationNode
-from sphinx_mintlify_output.toctree import doc_summary, doc_title_or_slug
+from sphinx_mintlify_output.toctree import (
+    doc_icon,
+    doc_summary,
+    doc_title_or_slug,
+    docname_from_refuri,
+)
 from sphinx_mintlify_output.urls import url_for
 
 
@@ -24,14 +29,15 @@ class ToctreeNode(TranslationNode):
         caption = (self.node.get("caption") or "").strip()
         entries = self.node.get("entries") or []
         env = self.ctx.builder.env
-        cards: list[tuple[str, str, str]] = []
+        cards: list[tuple[str, str, str, str]] = []
         for title, docname in entries:
             if not docname:
                 continue
             label = (title or "").strip() or doc_title_or_slug(env, docname)
             description = doc_summary(env, docname)
+            icon = doc_icon(env, docname)
             href = url_for(self.ctx.docname, docname)
-            cards.append((label, href, description))
+            cards.append((label, href, description, icon))
         if not cards:
             return ""
         return _render_toctree_cards(caption, cards)
@@ -46,7 +52,8 @@ class CompoundNode(TranslationNode):
             return self.render_children()
         caption = ""
         seen: set[str] = set()
-        cards: list[tuple[str, str, str]] = []
+        env = self.ctx.builder.env
+        cards: list[tuple[str, str, str, str]] = []
         for descendant in self.node.findall():
             if isinstance(descendant, nodes.caption):
                 caption = descendant.astext().strip()
@@ -61,21 +68,27 @@ class CompoundNode(TranslationNode):
             # ``refuri`` already comes from ``MintlifyBuilder.get_relative_uri``,
             # so it's either an absolute URL (``/path`` or ``http(s)://``),
             # a fragment, or a relative slug — emit it verbatim either way.
-            cards.append((title, refuri, ""))
+            docname = docname_from_refuri(self.ctx.docname, refuri)
+            icon = doc_icon(env, docname) if docname else ""
+            cards.append((title, refuri, "", icon))
         if not cards:
             return ""
         return _render_toctree_cards(caption, cards)
 
 
-def _render_toctree_cards(caption: str, cards: list[tuple[str, str, str]]) -> str:
+def _render_toctree_cards(caption: str, cards: list[tuple[str, str, str, str]]) -> str:
     out: list[str] = []
     if caption:
         out.append(f"## {caption}\n\n")
     out.append("<Columns cols={2}>\n")
-    for label, href, description in cards:
-        out.append(
-            f'  <Card title="{escape_attr(label)}" href="{escape_attr(href)}">\n'
-        )
+    for label, href, description, icon in cards:
+        attrs = [
+            f'title="{escape_attr(label)}"',
+            f'href="{escape_attr(href)}"',
+        ]
+        if icon:
+            attrs.append(f'icon="{escape_attr(icon)}"')
+        out.append(f"  <Card {' '.join(attrs)}>\n")
         if description:
             out.append(f"    {description}\n")
         out.append("  </Card>\n")

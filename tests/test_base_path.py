@@ -11,6 +11,22 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from sphinx.testing.util import SphinxTestApp
+
+
+@pytest.fixture
+def autodoc_app_prefixed(make_app, sphinx_test_tempdir, rootdir) -> SphinxTestApp:
+    test_root_path = rootdir / "test-autodoc"
+    srcdir = sphinx_test_tempdir / "autodoc"
+    import shutil
+
+    shutil.copytree(test_root_path, srcdir, dirs_exist_ok=True)
+    app = make_app(
+        buildername="mintlify",
+        srcdir=srcdir / "docs",
+        confoverrides={"mintlify_base_path": "/sandboxes/sdk"},
+    )
+    yield app
 
 
 @pytest.mark.sphinx("mintlify", testroot="base-path")
@@ -54,16 +70,19 @@ def test_back_link_from_subpage_prefixed(app) -> None:
     assert "(/sandboxes/sdk/index)" in text
 
 
-@pytest.mark.sphinx(
-    "mintlify",
-    testroot="autodoc",
-    confoverrides={"mintlify_base_path": "/sandboxes/sdk"},
-)
-def test_autodoc_type_link_prefixed(app) -> None:
-    app.build()
-    index = (Path(app.outdir) / "index.mdx").read_text("utf-8")
-    settings = (Path(app.outdir) / "nested/settings.mdx").read_text("utf-8")
-    assert "(/sandboxes/sdk/nested/config#example.nested.config.Config)" in index
-    assert "(/sandboxes/sdk/nested/settings#example.nested.settings.Settings)" in index
-    assert 'href="/sandboxes/sdk/nested/settings"' in index
-    assert "(/sandboxes/sdk/nested/config#example.nested.config.Config)" in settings
+def test_autodoc_type_link_prefixed(autodoc_app_prefixed) -> None:
+    autodoc_app_prefixed.build()
+    index = (Path(autodoc_app_prefixed.outdir) / "index.mdx").read_text("utf-8")
+    category = (Path(autodoc_app_prefixed.outdir) / "catalog/category.mdx").read_text(
+        "utf-8"
+    )
+    cart = (Path(autodoc_app_prefixed.outdir) / "orders/cart.mdx").read_text("utf-8")
+    assert "(/sandboxes/sdk/catalog/product#example.catalog.product.Product)" in index
+    assert (
+        "(/sandboxes/sdk/catalog/category#example.catalog.category.Category)" in index
+    )
+    assert 'href="/sandboxes/sdk/catalog/category"' in index
+    assert (
+        "(/sandboxes/sdk/catalog/product#example.catalog.product.Product)" in category
+    )
+    assert "(/sandboxes/sdk/catalog/product#example.catalog.product.Product)" in cart

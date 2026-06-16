@@ -39,6 +39,11 @@ class FieldListNode(TranslationNode):
         return self.render_children() + "\n"
 
 
+class FieldNode(TranslationNode):
+    def render(self) -> str:
+        return self.render_children()
+
+
 class FieldNameNode(TranslationNode):
     def render(self) -> str:
         return f"- **{self.render_children()}** — "

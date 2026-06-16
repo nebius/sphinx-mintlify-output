@@ -6,6 +6,7 @@ Index
 
    second
    sub/nested
+   badges
 
 External link: `Mintlify <https://mintlify.com>`_.
 

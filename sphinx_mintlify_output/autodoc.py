@@ -20,7 +20,7 @@ from typing import Any
 from docutils import nodes
 
 from sphinx_mintlify_output.state import ParamInfo
-from sphinx_mintlify_output.urls import base_path as mintlify_base_path_var
+from sphinx_mintlify_output.urls import url_for
 
 
 def desc_short_name(signature: nodes.Element) -> str:
@@ -264,12 +264,10 @@ def lookup_python_object(env: Any, name: str) -> tuple[str, str] | None:
     return None
 
 
-def link_types_in_string(type_str: str, env: Any) -> str:
+def link_types_in_string(type_str: str, from_doc: str, env: Any) -> str:
     """Wrap recognised class names inside a type expression with markdown links."""
     if not type_str:
         return ""
-
-    prefix = str(mintlify_base_path_var.get() or "")
 
     def replace(match: re.Match[str]) -> str:
         token = match.group(1)
@@ -279,7 +277,7 @@ def link_types_in_string(type_str: str, env: Any) -> str:
         if ref is None:
             return token
         docname, anchor = ref
-        href = f"{prefix}/{docname}"
+        href = url_for(from_doc, docname)
         if anchor:
             href = href + "#" + anchor
         return f"[`{token}`]({href})"

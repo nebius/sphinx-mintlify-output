@@ -1,6 +1,4 @@
----
-title: Code group
----
+# Code group
 
 ::::{tab-set}
 :::{tab-item} python

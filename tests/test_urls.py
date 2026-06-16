@@ -33,19 +33,19 @@ def reset_base_path() -> None:
     "from_doc,target,expected",
     [
         # Same level — neighbour pages
-        ("index", "intro", "intro"),
-        ("index", "guide/install", "guide/install"),
+        ("index", "intro", "./intro"),
+        ("index", "guide/install", "./guide/install"),
         # Nested page linking to a sibling at root
         ("guide/setup", "intro", "../intro"),
-        ("guide/setup", "guide/install", "install"),
+        ("guide/setup", "guide/install", "./install"),
         # Deeper nesting
         ("guide/sub/page", "intro", "../../intro"),
         ("guide/sub/page", "guide/install", "../install"),
         # Image-style targets follow the same rules
-        ("index", "images/logo.png", "images/logo.png"),
+        ("index", "images/logo.png", "./images/logo.png"),
         ("guide/setup", "images/logo.png", "../images/logo.png"),
         # Leading slashes on target are stripped — caller-friendly
-        ("index", "/intro", "intro"),
+        ("index", "/intro", "./intro"),
         ("guide/setup", "/intro", "../intro"),
     ],
 )
@@ -98,4 +98,4 @@ def test_contextvar_set_reset_restores_relative_mode() -> None:
     token = urls.base_path.set(PurePosixPath("/x"))
     assert url_for("index", "intro") == "/x/intro"
     urls.base_path.reset(token)
-    assert url_for("index", "intro") == "intro"
+    assert url_for("index", "intro") == "./intro"

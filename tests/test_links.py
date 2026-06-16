@@ -15,15 +15,6 @@ def test_external_link(app) -> None:
 
 
 @pytest.mark.sphinx("mintlify", testroot="links")
-def test_internal_doc_xref(app) -> None:
-    """Top-level → top-level ``:doc:`` links use a plain relative slug."""
-    app.build()
-    text = (Path(app.outdir) / "index.mdx").read_text("utf-8")
-    assert "](second)" in text, text
-    assert "](/second)" not in text
-
-
-@pytest.mark.sphinx("mintlify", testroot="links")
 def test_anchor_target(app) -> None:
     app.build()
     text = (Path(app.outdir) / "index.mdx").read_text("utf-8")
@@ -32,18 +23,10 @@ def test_anchor_target(app) -> None:
 
 
 @pytest.mark.sphinx("mintlify", testroot="links")
-def test_image_default(app) -> None:
-    """Top-level image renders without a leading slash in relative mode."""
-    app.build()
-    text = (Path(app.outdir) / "second.mdx").read_text("utf-8")
-    assert "![Logo](images/logo.png)" in text
-
-
-@pytest.mark.sphinx("mintlify", testroot="links")
 def test_image_sized(app) -> None:
     app.build()
     text = (Path(app.outdir) / "second.mdx").read_text("utf-8")
-    assert '<img src="images/logo.png"' in text
+    assert '<img src="./images/logo.png"' in text
     assert 'width="64px"' in text
 
 
@@ -56,25 +39,17 @@ def test_figure_wraps_in_frame(app) -> None:
 
 
 @pytest.mark.sphinx("mintlify", testroot="links")
+def test_linked_badge_image_stays_inline(app) -> None:
+    """Image link text must not get block-level blank lines inside the wrapper."""
+    app.build()
+    text = (Path(app.outdir) / "badges.mdx").read_text("utf-8")
+    assert "[![Logo](./images/logo.png)](https://example.com)" in text
+    assert "](./images/logo.png)\n\n](" not in text
+
+
+@pytest.mark.sphinx("mintlify", testroot="links")
 def test_images_copied(app) -> None:
     app.build()
     out = Path(app.outdir)
     assert (out / "images" / "logo.png").exists()
     assert (out / "images" / "diagram.png").exists()
-
-
-@pytest.mark.sphinx("mintlify", testroot="links")
-def test_nested_doc_relative_image(app) -> None:
-    """A nested page climbs out via ``../images/...`` in relative mode."""
-    app.build()
-    text = (Path(app.outdir) / "sub" / "nested.mdx").read_text("utf-8")
-    assert "![Logo](../images/logo.png)" in text
-
-
-@pytest.mark.sphinx("mintlify", testroot="links")
-def test_nested_doc_xref_relative(app) -> None:
-    """Cross-doc refs from a nested page also climb via ``..``."""
-    app.build()
-    text = (Path(app.outdir) / "sub" / "nested.mdx").read_text("utf-8")
-    assert "](../second)" in text
-    assert "](../index)" in text

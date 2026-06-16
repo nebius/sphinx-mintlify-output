@@ -1,6 +1,22 @@
 ---
+icon: code
 title: API
 ---
+
+<Tabs>
+<Tab title="Async">
+```python
+await add(1, 2)
+```
+
+</Tab>
+<Tab title="Sync">
+```python
+add(1, 2)
+```
+
+</Tab>
+</Tabs>
 
 <a id="example.Greeter"></a>
 
@@ -20,22 +36,24 @@ The display name of the greeter.
 Whether to use polite forms.
 </ParamField>
 
+**Icon:** hand-wave
+
 <div className="pl-4 ml-1 my-4">
 
 ### Attributes
 
-<a id="example.Greeter.config"></a>
-<ResponseField name="config" type="Config">
-[`Config`](/nested/config#example.nested.config.Config)
+<a id="example.Greeter.category"></a>
+<ResponseField name="category" type="Category">
+[`Category`](./catalog/category#example.catalog.category.Category)
 
-Current client configuration.
+Active category.
 </ResponseField>
 
-<a id="example.Greeter.settings"></a>
-<ResponseField name="settings" type="Settings">
-[`Settings`](/nested/settings#example.nested.settings.Settings)
+<a id="example.Greeter.product"></a>
+<ResponseField name="product" type="Product">
+[`Product`](./catalog/product#example.catalog.product.Product)
 
-Active settings.
+Current product.
 </ResponseField>
 
 ### Methods
@@ -87,8 +105,10 @@ The sum.
 </ResponseField>
 
 <Columns cols={2}>
-  <Card title="Config" href="nested/config">
+  <Card title="Product" href="./catalog/product" icon="box">
   </Card>
-  <Card title="Settings" href="nested/settings">
+  <Card title="Category" href="./catalog/category" icon="tags">
+  </Card>
+  <Card title="Cart" href="./orders/cart" icon="cart-shopping">
   </Card>
 </Columns>

@@ -51,6 +51,7 @@ from sphinx_mintlify_output.nodes.definitions import (
     FieldBodyNode,
     FieldListNode,
     FieldNameNode,
+    FieldNode,
     TermNode,
 )
 from sphinx_mintlify_output.nodes.footnotes import (
@@ -79,6 +80,7 @@ from sphinx_mintlify_output.nodes.lists import (
 from sphinx_mintlify_output.nodes.math import MathBlockNode, MathNode
 from sphinx_mintlify_output.nodes.raw import CommentNode, RawNode
 from sphinx_mintlify_output.nodes.sphinx_design import ContainerNode
+from sphinx_mintlify_output.nodes.sphinx_inline_tabs import TabContainerNode
 from sphinx_mintlify_output.nodes.tables import TableNode
 from sphinx_mintlify_output.nodes.toctree import CompoundNode, ToctreeNode
 
@@ -118,6 +120,7 @@ NODE_REGISTRY: dict[str, type[TranslationNode]] = {
     "classifier": ClassifierNode,
     "definition": DefinitionNode,
     "field_list": FieldListNode,
+    "field": FieldNode,
     "field_name": FieldNameNode,
     "field_body": FieldBodyNode,
     # Tables
@@ -146,6 +149,7 @@ NODE_REGISTRY: dict[str, type[TranslationNode]] = {
     "versionmodified": VersionModifiedNode,
     "deprecated": VersionModifiedNode,
     "container": ContainerNode,
+    "TabContainer": TabContainerNode,
     # Autodoc
     "desc": DescNode,
     "desc_signature": DescSignatureNode,

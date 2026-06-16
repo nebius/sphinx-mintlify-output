@@ -11,7 +11,8 @@
         "group": "Pages",
         "pages": [
           "second",
-          "sub/nested"
+          "sub/nested",
+          "badges"
         ]
       }
     ]

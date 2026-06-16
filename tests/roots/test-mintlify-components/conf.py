@@ -1,5 +1,10 @@
 project = "Components"
-extensions = ["sphinx_mintlify_output", "sphinx_design", "myst_parser"]
+extensions = [
+    "sphinx_mintlify_output",
+    "sphinx_design",
+    "myst_parser",
+    "sphinx_inline_tabs",
+]
 exclude_patterns = ["_build"]
 master_doc = "index"
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}

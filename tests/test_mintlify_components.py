@@ -48,15 +48,3 @@ def test_grid_as_columns_with_cols(app) -> None:
     text = (Path(app.outdir) / "index.mdx").read_text("utf-8")
     assert "<Columns cols={3}>" in text
     assert "</Columns>" in text
-
-
-@pytest.mark.sphinx("mintlify", testroot="mintlify-components")
-def test_codegroup_for_all_code_tabs(app) -> None:
-    app.build()
-    text = (Path(app.outdir) / "codes.mdx").read_text("utf-8")
-    assert "<CodeGroup>" in text
-    assert "```python python" in text
-    assert 'print("hi")' in text
-    assert "```javascript javascript" in text
-    assert 'console.log("hi");' in text
-    assert "</CodeGroup>" in text

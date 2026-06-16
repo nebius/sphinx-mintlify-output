@@ -40,7 +40,13 @@ def _iter_relative(out_dir: Path) -> list[Path]:
         if not p.is_file():
             continue
         rel = p.relative_to(out_dir)
-        if any(part == ".doctrees" for part in rel.parts):
+        if any(
+            part == ".doctrees"
+            or part == "_sphinx_design_static"
+            or part == "_sphinx_inline_tabs_static"
+            or part == "static"
+            for part in rel.parts
+        ):
             continue
         out.append(rel)
     return sorted(out)
@@ -86,6 +92,8 @@ def test_golden_corpus_matches(
     from sphinx.testing.fixtures import SphinxTestApp
 
     src = ROOTS_DIR / f"test-{testroot}"
+    if (src / "docs").is_dir() and (src / "docs" / "conf.py").is_file():
+        src = src / "docs"
     out = tmp_path / "build"
     app = SphinxTestApp(buildername="mintlify", srcdir=src, builddir=out)  # type: ignore[arg-type]
     try:

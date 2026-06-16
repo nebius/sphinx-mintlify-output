@@ -4,27 +4,20 @@ from __future__ import annotations
 
 from docutils import nodes
 
-from sphinx_mintlify_output.escaping import pick_block_fence
+from sphinx_mintlify_output.escaping import escape_attr, pick_block_fence
 from sphinx_mintlify_output.nodes.base import TranslationNode
 
 
 class SectionNode(TranslationNode):
-    """A docutils section — emits an anchor + bumps heading depth for children."""
+    """A docutils section — bumps heading depth for children."""
 
     def render(self) -> str:
-        emit_anchors = self.ctx.builder.config.mintlify_emit_anchors
-        is_top_level = self.ctx.section_level == 0 and not self.ctx.title_captured
-        prefix = ""
-        if emit_anchors and not is_top_level:
-            ids = self.node.get("ids") or []
-            if ids:
-                prefix = "".join(f'<a id="{sid}"></a>\n' for sid in ids) + "\n"
         self.ctx.section_level += 1
         try:
             body = self.render_children()
         finally:
             self.ctx.section_level -= 1
-        return prefix + body
+        return body
 
 
 class TitleNode(TranslationNode):
@@ -45,7 +38,16 @@ class TitleNode(TranslationNode):
             self.ctx.title_captured = True
             return ""
         level = max(1, self.ctx.section_level)
-        return f"{'#' * level} {self.render_children()}\n\n"
+        prefix = ""
+        if self.ctx.builder.config.mintlify_emit_anchors and isinstance(
+            self.node.parent, nodes.section
+        ):
+            ids = self.node.parent.get("ids") or []
+            # Mintlify derives the primary heading slug from markdown; only
+            # emit anchors for additional explicit reference targets.
+            for sid in ids[1:]:
+                prefix += f'<a id="{escape_attr(sid)}"></a>\n'
+        return prefix + f"{'#' * level} {self.render_children()}\n\n"
 
 
 class ParagraphNode(TranslationNode):

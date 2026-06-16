@@ -60,7 +60,14 @@ class ContainerNode(TranslationNode):
         ]
         if items and all(tab_item_is_code_only(item) for item in items):
             return self._render_code_group(items)
-        out = ["<Tabs>\n"]
+
+        sync_attr = ""
+        if self.node.get("sync") is False or (
+            "sync" in self.node.attributes and self.node.attributes["sync"] == "false"
+        ):
+            sync_attr = " sync={false}"
+
+        out = [f"<Tabs{sync_attr}>\n"]
         for item in items:
             out.append(self._render_tab_item(item))
         out.append("</Tabs>\n\n")
@@ -100,7 +107,7 @@ class ContainerNode(TranslationNode):
                 continue
             content_children.append(child)
         body = self.render_docutils_nodes(content_children).strip("\n").strip()
-        inner = body + "\n" if body else ""
+        inner = body + "\n\n" if body else ""
         return f'<Tab title="{escape_attr(title)}">\n{inner}</Tab>\n'
 
     def _render_dropdown(self) -> str:
