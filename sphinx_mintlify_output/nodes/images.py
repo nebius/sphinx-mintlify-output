@@ -22,9 +22,12 @@ class ImageNode(TranslationNode):
         uri = self.node.get("uri", "")
         alt = self.node.get("alt", "")
         builder = self.ctx.builder
-        canonical = builder.images.get(uri, uri)
-        image_dir = builder.config.mintlify_image_dir
-        target = url_for(self.ctx.docname, posixpath.join(image_dir, canonical))
+        if uri.startswith(("http://", "https://")):
+            target = uri
+        else:
+            canonical = builder.images.get(uri, uri)
+            image_dir = builder.config.mintlify_image_dir
+            target = url_for(self.ctx.docname, posixpath.join(image_dir, canonical))
         width = self.node.get("width")
         height = self.node.get("height")
         if width or height:

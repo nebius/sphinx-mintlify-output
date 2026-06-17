@@ -34,19 +34,23 @@ def build_docs_json(env: BuildEnvironment, config: Config) -> dict[str, Any]:
 
     if master_doc in env.tocs:
         collect_toctree_entries(
-            env, env.tocs[master_doc], groups, pages, visited, depth=0
+            env, env.tocs[master_doc], groups, pages, visited, master_doc, depth=0
         )
 
-    navigation: dict[str, Any] = {}
     promoted = [p for p in pages if isinstance(p, dict) and "group" in p]
     bare_pages = [p for p in pages if not (isinstance(p, dict) and "group" in p)]
-    combined_groups = groups + promoted
-    if combined_groups and not bare_pages:
-        navigation["groups"] = combined_groups
-    elif bare_pages and not combined_groups:
-        navigation["pages"] = bare_pages
-    elif combined_groups and bare_pages:
-        navigation["pages"] = [*bare_pages, *combined_groups]
+    nav_pages = (
+        [master_doc, *bare_pages, *groups, *promoted]
+        if master_doc
+        else [
+            *bare_pages,
+            *groups,
+            *promoted,
+        ]
+    )
+    navigation: dict[str, Any] = {}
+    if nav_pages:
+        navigation["pages"] = nav_pages
 
     project_name = getattr(config, "project", "Documentation")
     # Mintlify's docs.json schema requires `colors` (with at least a
@@ -82,6 +86,7 @@ def collect_toctree_entries(
     groups: list[dict[str, Any]],
     pages: list[Any],
     visited: set[str],
+    master_doc: str,
     depth: int,
 ) -> None:
     if depth >= _MAX_TOCTREE_DEPTH:
@@ -93,9 +98,11 @@ def collect_toctree_entries(
         return
     for child in node.children:
         if isinstance(child, toctree):
-            handle_toctree(env, child, groups, pages, visited, depth=depth)
+            handle_toctree(env, child, groups, pages, visited, master_doc, depth=depth)
         elif isinstance(child, nodes.Element):
-            collect_toctree_entries(env, child, groups, pages, visited, depth=depth)
+            collect_toctree_entries(
+                env, child, groups, pages, visited, master_doc, depth=depth
+            )
 
 
 def handle_toctree(
@@ -104,18 +111,19 @@ def handle_toctree(
     groups: list[dict[str, Any]],
     pages: list[Any],
     visited: set[str],
+    master_doc: str,
     depth: int,
 ) -> None:
     caption = node.get("caption")
     entries = node.get("entries") or []
     group_pages: list[Any] = []
     for _title, docname in entries:
-        if not docname:
+        if not docname or docname == master_doc:
             continue
         if docname in visited:
             continue
         visited.add(docname)
-        page_entry = page_for_doc(env, docname, visited, depth=depth + 1)
+        page_entry = page_for_doc(env, docname, visited, master_doc, depth=depth + 1)
         group_pages.append(page_entry)
     if caption:
         groups.append({"group": caption, "pages": group_pages})
@@ -127,13 +135,20 @@ def page_for_doc(
     env: BuildEnvironment,
     docname: str,
     visited: set[str],
+    master_doc: str,
     depth: int,
 ) -> Any:
     sub_groups: list[dict[str, Any]] = []
     sub_pages: list[Any] = []
     if docname in env.tocs:
         collect_toctree_entries(
-            env, env.tocs[docname], sub_groups, sub_pages, visited, depth=depth
+            env,
+            env.tocs[docname],
+            sub_groups,
+            sub_pages,
+            visited,
+            master_doc,
+            depth=depth,
         )
     if not sub_groups and not sub_pages:
         return docname

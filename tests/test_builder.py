@@ -30,6 +30,20 @@ def test_writes_docs_json(app) -> None:
     assert "navigation" in data
 
 
+@pytest.mark.sphinx("mintlify", testroot="mintlify-components")
+def test_strips_build_artifacts(app) -> None:
+    """Drop HTML extension static dirs and in-tree .doctrees from outdir."""
+    app.build()
+    out = Path(app.outdir)
+    static_dirs = [
+        p.name
+        for p in out.iterdir()
+        if p.is_dir() and p.name.startswith("_sphinx_") and p.name.endswith("_static")
+    ]
+    assert static_dirs == []
+    assert not (out / ".doctrees").exists()
+
+
 @pytest.mark.sphinx("mintlify", testroot="skeleton")
 def test_page_write_failure_aborts_build(app, monkeypatch) -> None:
     """A failure writing the page output must surface as an exception.

@@ -1,3 +1,5 @@
+:icon: star
+
 Mintlify components
 ===================
 

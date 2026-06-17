@@ -48,3 +48,4 @@ def test_grid_as_columns_with_cols(app) -> None:
     text = (Path(app.outdir) / "index.mdx").read_text("utf-8")
     assert "<Columns cols={3}>" in text
     assert "</Columns>" in text
+    assert 'href="./index" icon="star"' in text

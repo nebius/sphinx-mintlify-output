@@ -77,3 +77,15 @@ class LiteralBlockNode(TranslationNode):
             language = ""
         fence = pick_block_fence(text)
         return f"{fence}{language}\n{text}\n{fence}\n\n"
+
+
+class MermaidNode(TranslationNode):
+    """``sphinxcontrib.mermaid`` ``mermaid`` node → Mintlify `` ```mermaid `` fence.
+
+    Diagram source lives in the node ``code`` attribute, not in child nodes.
+    """
+
+    def render(self) -> str:
+        code = str(self.node.get("code", "")).rstrip("\n")
+        fence = pick_block_fence(code)
+        return f"{fence}mermaid\n{code}\n{fence}\n\n"

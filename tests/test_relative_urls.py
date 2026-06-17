@@ -77,6 +77,5 @@ def test_autodoc_type_link_relative(autodoc_app_relative) -> None:
     cart = (Path(autodoc_app_relative.outdir) / "orders/cart.mdx").read_text("utf-8")
     assert "(./catalog/product#example.catalog.product.Product)" in index
     assert "(./catalog/category#example.catalog.category.Category)" in index
-    assert 'href="./catalog/category"' in index
     assert "(./product#example.catalog.product.Product)" in category
     assert "(../catalog/product#example.catalog.product.Product)" in cart

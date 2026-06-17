@@ -39,6 +39,7 @@ from sphinx_mintlify_output.nodes.base import (
 from sphinx_mintlify_output.nodes.block import (
     BlockQuoteNode,
     LiteralBlockNode,
+    MermaidNode,
     ParagraphNode,
     SectionNode,
     TitleNode,
@@ -102,6 +103,7 @@ NODE_REGISTRY: dict[str, type[TranslationNode]] = {
     "block_quote": BlockQuoteNode,
     "transition": TransitionNode,
     "literal_block": LiteralBlockNode,
+    "mermaid": MermaidNode,
     # Inline text formatting
     "Text": TextNode,
     "emphasis": EmphasisNode,
