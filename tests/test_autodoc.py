@@ -61,3 +61,10 @@ def test_raises_field(autodoc_app) -> None:
     text = (Path(autodoc_app.outdir) / "index.mdx").read_text("utf-8")
     assert '<ResponseField name="raises">' in text
     assert "ValueError" in text
+
+
+def test_hidden_toctree_not_rendered(autodoc_app) -> None:
+    autodoc_app.build()
+    text = (Path(autodoc_app.outdir) / "index.mdx").read_text("utf-8")
+    assert "<Columns" not in text
+    assert "<Card" not in text

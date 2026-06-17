@@ -12,17 +12,36 @@ import pytest
 def test_navigation_groups(app) -> None:
     app.build()
     data = json.loads((Path(app.outdir) / "docs.json").read_text("utf-8"))
-    assert "groups" in data["navigation"]
-    captions = [g["group"] for g in data["navigation"]["groups"]]
+    nav = data["navigation"]
+    assert "pages" in nav
+    assert "groups" not in nav
+    groups = [p for p in nav["pages"] if isinstance(p, dict)]
+    captions = [g["group"] for g in groups]
     assert "Get started" in captions
     assert "Reference" in captions
+
+
+@pytest.mark.sphinx("mintlify", testroot="navigation")
+def test_master_doc_in_navigation(app) -> None:
+    app.build()
+    data = json.loads((Path(app.outdir) / "docs.json").read_text("utf-8"))
+    pages = data["navigation"]["pages"]
+    assert pages[0] == "index"
+    get_started = next(
+        p for p in pages if isinstance(p, dict) and p["group"] == "Get started"
+    )
+    assert "index" not in get_started["pages"]
 
 
 @pytest.mark.sphinx("mintlify", testroot="navigation")
 def test_navigation_pages_in_group(app) -> None:
     app.build()
     data = json.loads((Path(app.outdir) / "docs.json").read_text("utf-8"))
-    groups = {g["group"]: g["pages"] for g in data["navigation"]["groups"]}
+    groups = {
+        p["group"]: p["pages"]
+        for p in data["navigation"]["pages"]
+        if isinstance(p, dict)
+    }
     assert "tutorial/quickstart" in groups["Get started"]
     assert "tutorial/install" in groups["Get started"]
 
@@ -31,7 +50,11 @@ def test_navigation_pages_in_group(app) -> None:
 def test_nested_toctree_yields_nested_group(app) -> None:
     app.build()
     data = json.loads((Path(app.outdir) / "docs.json").read_text("utf-8"))
-    groups = {g["group"]: g["pages"] for g in data["navigation"]["groups"]}
+    groups = {
+        p["group"]: p["pages"]
+        for p in data["navigation"]["pages"]
+        if isinstance(p, dict)
+    }
     ref_pages = groups["Reference"]
     nested = next((p for p in ref_pages if isinstance(p, dict)), None)
     assert nested is not None
@@ -57,6 +80,7 @@ def test_top_level_mixed_pages_and_groups_preserved(app) -> None:
     nav = data["navigation"]
     assert "pages" in nav, "mixed toctree should fall back to top-level pages"
     items = nav["pages"]
+    assert items[0] == "index"
     bare = [p for p in items if isinstance(p, str)]
     groups = {g["group"]: g for g in items if isinstance(g, dict)}
     assert "intro" in bare

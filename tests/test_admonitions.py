@@ -76,11 +76,14 @@ def test_design_card(app) -> None:
 def test_design_tab_set(app) -> None:
     app.build()
     text = (Path(app.outdir) / "design.mdx").read_text("utf-8")
-    assert "<Tabs>" in text
+    assert "<Tabs sync={false}>" in text
     assert '<Tab title="Python">' in text
     assert "Python content." in text
     assert '<Tab title="TypeScript">' in text
     assert "</Tabs>" in text
+    assert "<CodeGroup sync={false}>" in text
+    assert "```bash bash" in text
+    assert "echo hi" in text
 
 
 @pytest.mark.sphinx("mintlify", testroot="admonitions")

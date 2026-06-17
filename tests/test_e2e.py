@@ -23,7 +23,9 @@ def test_docs_json_complete(app) -> None:
     data = json.loads((Path(app.outdir) / "docs.json").read_text("utf-8"))
     assert data["name"] == "E2E Docs"
     assert data["logo"]["light"] == "static/favicon.ico"
-    groups = data["navigation"]["groups"]
+    pages = data["navigation"]["pages"]
+    assert pages[0] == "index"
+    groups = [p for p in pages if isinstance(p, dict)]
     captions = [g["group"] for g in groups]
     assert "Guides" in captions
 

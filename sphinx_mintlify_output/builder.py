@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import posixpath
+import shutil
 from os import path
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -27,27 +28,15 @@ logger = logging.getLogger(__name__)
 def inject_hidden_toctrees(
     builder: Builder, docname: str, doctree: nodes.document
 ) -> None:
-    """Append raw ``:hidden:`` toctree nodes to the body for the translator.
+    """No-op: hidden toctrees drive ``docs.json`` navigation only.
 
-    Sphinx normally strips hidden toctrees during resolution because the
-    sidebar already shows them. Mintlify drives its sidebar from
-    ``docs.json``, so without this hook a page whose only body is a hidden
-    toctree renders empty. We fetch the raw doctree and append a copy of
-    every hidden toctree so the translator can render its top-level
-    entries as a Columns/Card group.
+    Sphinx resolves hidden toctrees into ``env.tocs`` for navigation but
+    strips them from the page body. We do not re-inject them for MDX
+    rendering — ``:hidden:`` means the sidebar/cards should not appear
+    on the page itself (use sphinx-design grids or a visible toctree
+    when you want in-page card navigation).
     """
-    from sphinx import addnodes
-
-    try:
-        raw = builder.env.get_doctree(docname)
-    except FileNotFoundError:
-        return
-
-    hidden_nodes = [tt for tt in raw.findall(addnodes.toctree) if tt.get("hidden")]
-    for tt in hidden_nodes:
-        copy = tt.deepcopy()
-        copy["hidden"] = False
-        doctree.append(copy)
+    return
 
 
 class MintlifyBuilder(Builder):
@@ -63,6 +52,7 @@ class MintlifyBuilder(Builder):
         "image/jpeg",
         "image/webp",
     ]
+    supported_remote_images = True
 
     def init(self) -> None:
         self.images: dict[str, str] = {}
@@ -195,7 +185,47 @@ class MintlifyBuilder(Builder):
             json.dump(data, fp, indent=2, ensure_ascii=False)
             fp.write("\n")
 
+    def _cleanup_build_artifacts(self) -> None:
+        """Drop intermediate files that should not ship with Mintlify output."""
+        self._cleanup_html_extension_static()
+        self._cleanup_in_tree_doctrees()
+
+    def _cleanup_html_extension_static(self) -> None:
+        """Drop CSS/JS trees written by HTML-only extensions (e.g. sphinx-design).
+
+        Those extensions hook ``builder-inited`` and copy assets into
+        ``outdir`` for HTML rendering. The Mintlify builder translates
+        their directives to MDX components instead, so the files are
+        unused noise in the published output.
+        """
+        try:
+            entries = os.listdir(self.outdir)
+        except OSError:
+            return
+        for name in entries:
+            if not (name.startswith("_sphinx_") and name.endswith("_static")):
+                continue
+            target = path.join(self.outdir, name)
+            if path.isdir(target):
+                shutil.rmtree(target)
+
+    def _cleanup_in_tree_doctrees(self) -> None:
+        """Remove pickled doctrees when Sphinx stores them under ``outdir``.
+
+        The default ``sphinx-build`` layout places ``.doctrees`` inside
+        ``outdir``. That cache is build-only; Mintlify deploys should not
+        include it. When ``-d`` points outside ``outdir``, leave it alone
+        so incremental rebuilds keep their cache.
+        """
+        doctreedir = path.abspath(self.doctreedir)
+        outdir = path.abspath(self.outdir)
+        if doctreedir != outdir and not doctreedir.startswith(outdir + path.sep):
+            return
+        if path.isdir(doctreedir):
+            shutil.rmtree(doctreedir)
+
     def finish(self) -> None:
         self.copy_image_files()
         self.copy_static_files()
         self.write_docs_json()
+        self._cleanup_build_artifacts()

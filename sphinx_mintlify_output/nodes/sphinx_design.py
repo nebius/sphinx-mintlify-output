@@ -17,6 +17,7 @@ from sphinx_mintlify_output.components import (
 )
 from sphinx_mintlify_output.escaping import escape_attr, pick_block_fence
 from sphinx_mintlify_output.nodes.base import TranslationNode
+from sphinx_mintlify_output.toctree import doc_icon, docname_from_refuri
 
 
 class ContainerNode(TranslationNode):
@@ -46,6 +47,11 @@ class ContainerNode(TranslationNode):
             attrs.append(f'title="{escape_attr(title)}"')
         if href:
             attrs.append(f'href="{escape_attr(href)}"')
+            docname = docname_from_refuri(self.ctx.docname, href)
+            if docname:
+                icon = doc_icon(self.ctx.builder.env, docname)
+                if icon:
+                    attrs.append(f'icon="{escape_attr(icon)}"')
         attr_str = (" " + " ".join(attrs)) if attrs else ""
         body = self.render_docutils_nodes(body_children).strip("\n").strip()
         inner = body + "\n" if body else ""
@@ -61,17 +67,16 @@ class ContainerNode(TranslationNode):
         if items and all(tab_item_is_code_only(item) for item in items):
             return self._render_code_group(items)
 
-        sync_attr = ""
-        if self.node.get("sync") is False or (
-            "sync" in self.node.attributes and self.node.attributes["sync"] == "false"
-        ):
-            sync_attr = " sync={false}"
-
-        out = [f"<Tabs{sync_attr}>\n"]
+        out = [f"<Tabs{self._tabs_sync_attr()}>\n"]
         for item in items:
             out.append(self._render_tab_item(item))
         out.append("</Tabs>\n\n")
         return "".join(out)
+
+    def _tabs_sync_attr(self) -> str:
+        if "no-sync" in (self.node.get("classes") or []):
+            return " sync={false}"
+        return ""
 
     def _render_code_group(self, items: list[nodes.container]) -> str:
         # Mintlify's documented form is ``<CodeGroup>`` with explicit
@@ -82,7 +87,7 @@ class ContainerNode(TranslationNode):
         # roundtrippable through standard markdown tools and (2) it does
         # not need a separate JSX wrapper per item. If Mintlify ever
         # drops this convenience, swap to ``<CodeBlock>`` children here.
-        out = ["<CodeGroup>\n\n"]
+        out = [f"<CodeGroup{self._tabs_sync_attr()}>\n\n"]
         for item in items:
             title = tab_item_title(item)
             code, language = tab_item_code(item)

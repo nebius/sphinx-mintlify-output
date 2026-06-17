@@ -5,5 +5,9 @@
   "colors": {
     "primary": "#0d9373"
   },
-  "navigation": {}
+  "navigation": {
+    "pages": [
+      "index"
+    ]
+  }
 }

@@ -48,6 +48,19 @@ def test_linked_badge_image_stays_inline(app) -> None:
 
 
 @pytest.mark.sphinx("mintlify", testroot="links")
+def test_remote_badge_image_keeps_https_url(app) -> None:
+    """Remote badge images must not be downloaded into images/."""
+    app.build()
+    text = (Path(app.outdir) / "badges.mdx").read_text("utf-8")
+    assert (
+        "[![Remote](https://img.shields.io/badge/test-blue.svg)](https://example.com/remote)"
+        in text
+    )
+    out = Path(app.outdir)
+    assert not (out / "images" / "test-blue.svg").exists()
+
+
+@pytest.mark.sphinx("mintlify", testroot="links")
 def test_images_copied(app) -> None:
     app.build()
     out = Path(app.outdir)

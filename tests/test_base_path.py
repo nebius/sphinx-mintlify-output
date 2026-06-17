@@ -81,7 +81,6 @@ def test_autodoc_type_link_prefixed(autodoc_app_prefixed) -> None:
     assert (
         "(/sandboxes/sdk/catalog/category#example.catalog.category.Category)" in index
     )
-    assert 'href="/sandboxes/sdk/catalog/category"' in index
     assert (
         "(/sandboxes/sdk/catalog/product#example.catalog.product.Product)" in category
     )

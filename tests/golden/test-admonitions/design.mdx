@@ -6,7 +6,7 @@ title: Design directives
 Card body paragraph.
 </Card>
 
-<Tabs>
+<Tabs sync={false}>
 <Tab title="Python">
 Python content.
 
@@ -16,6 +16,18 @@ TypeScript content.
 
 </Tab>
 </Tabs>
+
+<CodeGroup sync={false}>
+
+```bash bash
+echo hi
+```
+
+```text text
+echo hi
+```
+
+</CodeGroup>
 
 <Accordion title="Hidden details">
 Some details.
