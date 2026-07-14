@@ -18,6 +18,7 @@ from sphinx_mintlify_output.autodoc import (
     format_desc_label,
     link_types_in_string,
     parse_param_head,
+    signature_style,
 )
 from sphinx_mintlify_output.components import CLASS_MEMBERS_CLOSE, CLASS_MEMBERS_OPEN
 from sphinx_mintlify_output.escaping import escape_attr, escape_mdx_text
@@ -121,7 +122,7 @@ class DescNode(TranslationNode):
 
 
 class DescSignatureNode(TranslationNode):
-    """Emit anchor, heading, and the fenced Python signature for a desc."""
+    """Emit anchor, heading, and the domain-styled fenced signature for a desc."""
 
     def render(self) -> str:
         if not isinstance(self.node, nodes.Element):
@@ -135,19 +136,24 @@ class DescSignatureNode(TranslationNode):
                 out.append("\n")
 
         desctype = ""
+        domain = ""
         parent = self.node.parent
         if isinstance(parent, nodes.Element):
             desctype = parent.get("desctype") or ""
+            domain = parent.get("domain") or ""
+        style = signature_style(domain)
         short_name = desc_short_name(self.node)
         depth = max(self.ctx.desc_depth, 1)
         heading_prefix = "#" * min(2 + depth - 1, 6)
-        label = format_desc_label(desctype, short_name)
+        label = format_desc_label(desctype, short_name, style)
         out.append(f"{heading_prefix} {label}\n\n")
 
         return_type = _lookup_return_type(self.node)
-        clean_sig = build_clean_signature(self.node, desctype, short_name, return_type)
+        clean_sig = build_clean_signature(
+            self.node, desctype, short_name, return_type, style
+        )
         if clean_sig:
-            out.append(f"```python\n{clean_sig}\n```\n\n")
+            out.append(f"```{style.fence}\n{clean_sig}\n```\n\n")
         return "".join(out)
 
 
@@ -173,6 +179,30 @@ class DescContentNode(TranslationNode):
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
+
+def desc_domain(node: nodes.Node | None) -> str:
+    """Return the Sphinx domain of the nearest enclosing ``desc`` node."""
+    from sphinx import addnodes
+
+    current = node
+    while current is not None:
+        if isinstance(current, addnodes.desc):
+            return current.get("domain") or ""
+        current = current.parent
+    return ""
+
+
+def linked_types(host: TranslationNode, node: nodes.Node, type_str: str) -> str:
+    """Cross-link type names through the Python domain — ``py`` descs only.
+
+    For any other domain (``Uint8Array | Promise<...>`` and friends) a
+    python-intersphinx lookup is noise at best, so the type stays plain
+    inline code.
+    """
+    if desc_domain(node) not in {"", "py"}:
+        return ""
+    return link_types_in_string(type_str, host.ctx.docname, host.ctx.builder.env)
 
 
 def _lookup_return_type(signature: nodes.Element) -> str:
@@ -241,7 +271,7 @@ def _render_desc_as_field(host: TranslationNode, node: nodes.Element) -> str:
     if type_str:
         attrs.append(f'type="{escape_attr(type_str)}"')
     body_parts: list[str] = []
-    type_links = link_types_in_string(type_str, host.ctx.docname, host.ctx.builder.env)
+    type_links = linked_types(host, node, type_str)
     if type_links and "](" in type_links:
         body_parts.append(type_links)
     if body:
@@ -466,7 +496,7 @@ def _render_one_param_field(
     elif default:
         attrs.append(f'default="{escape_attr(default)}"')
     body_parts: list[str] = []
-    type_links = link_types_in_string(type_str, host.ctx.docname, host.ctx.builder.env)
+    type_links = linked_types(host, host.node, type_str)
     if type_links and "](" in type_links:
         body_parts.append(type_links)
     if description and description.strip():
@@ -490,7 +520,7 @@ def _render_response_field(
     if type_str:
         attrs.append(f'type="{escape_attr(type_str)}"')
     body_parts: list[str] = []
-    type_links = link_types_in_string(type_str, host.ctx.docname, host.ctx.builder.env)
+    type_links = linked_types(host, host.node, type_str)
     if type_links and "](" in type_links:
         body_parts.append(type_links)
     if rendered:

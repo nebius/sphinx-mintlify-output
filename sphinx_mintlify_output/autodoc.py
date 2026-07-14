@@ -3,7 +3,8 @@
 Covers:
 
 * Signature reconstruction (:func:`build_clean_signature`,
-  :func:`decorate_signature`).
+  :func:`decorate_signature`), styled per Sphinx domain via
+  :class:`SignatureStyle` / :data:`SIGNATURE_STYLES`.
 * Heading and label formatting (:func:`format_desc_label`).
 * Parameter parsing for ``Parameters`` field lists
   (:func:`parse_param_item`, :func:`parse_param_head`,
@@ -15,12 +16,105 @@ Covers:
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Any
 
 from docutils import nodes
 
 from sphinx_mintlify_output.state import ParamInfo
 from sphinx_mintlify_output.urls import url_for
+
+
+@dataclass(frozen=True)
+class SignatureStyle:
+    """Per-domain rendering rules for ``desc`` signatures.
+
+    ``async_kw`` is a plain prefix composed with the declaration keyword
+    (``async `` + ``def `` for Python, ``async `` + ``function `` for JS);
+    an empty string drops the async marker for domains without one.
+    ``returns`` is a format string receiving the return type as ``{t}``.
+    """
+
+    fence: str
+    function_kw: str = ""
+    method_kw: str = ""
+    async_kw: str = ""
+    class_kw: str = ""
+    returns: str = ""
+    py_decorators: bool = False
+
+
+PYTHON_STYLE = SignatureStyle(
+    fence="python",
+    function_kw="def ",
+    method_kw="def ",
+    async_kw="async ",
+    class_kw="class ",
+    returns=" -> {t}",
+    py_decorators=True,
+)
+
+FALLBACK_STYLE = SignatureStyle(fence="text")
+
+# ``ts`` fence for the js domain on purpose: generics
+# (``Promise<FileResponse>``) and optional params (``options?``) only
+# highlight correctly in the TypeScript lexer.
+SIGNATURE_STYLES: dict[str, SignatureStyle] = {
+    "py": PYTHON_STYLE,
+    "js": SignatureStyle(
+        fence="ts",
+        function_kw="function ",
+        async_kw="async ",
+        class_kw="class ",
+        returns=": {t}",
+    ),
+    "ts": SignatureStyle(
+        fence="ts",
+        function_kw="function ",
+        async_kw="async ",
+        class_kw="class ",
+        returns=": {t}",
+    ),
+    # C/C++/C# signatures already carry parameter and return types —
+    # no prefixes or suffixes, just the right fence.
+    "c": SignatureStyle(fence="c"),
+    "cpp": SignatureStyle(fence="cpp", class_kw="class "),
+    "cs": SignatureStyle(fence="csharp", async_kw="async ", class_kw="class "),
+    "go": SignatureStyle(
+        fence="go",
+        function_kw="func ",
+        method_kw="func ",
+        class_kw="type ",
+        returns=" {t}",
+    ),
+    "rs": SignatureStyle(
+        fence="rust",
+        function_kw="fn ",
+        method_kw="fn ",
+        async_kw="async ",
+        class_kw="struct ",
+        returns=" -> {t}",
+    ),
+    "rb": SignatureStyle(fence="ruby", function_kw="def ", method_kw="def "),
+    "php": SignatureStyle(
+        fence="php",
+        function_kw="function ",
+        method_kw="function ",
+        returns=": {t}",
+    ),
+    "lua": SignatureStyle(fence="lua", function_kw="function ", method_kw="function "),
+    "std": FALLBACK_STYLE,
+}
+
+
+def signature_style(domain: str) -> SignatureStyle:
+    """Look up the :class:`SignatureStyle` for a Sphinx domain name.
+
+    An empty domain means a synthetic/legacy node — treated as Python to
+    preserve historical output; unknown domains fall back to a bare
+    ``text`` fence.
+    """
+    return SIGNATURE_STYLES.get(domain or "py", FALLBACK_STYLE)
 
 
 def desc_short_name(signature: nodes.Element) -> str:
@@ -33,9 +127,16 @@ def desc_short_name(signature: nodes.Element) -> str:
     return short
 
 
-def decorate_signature(sig: str, desctype: str, return_type: str = "") -> str:
-    """Massage a captured desc signature into a Python-like declaration."""
+def decorate_signature(
+    sig: str,
+    desctype: str,
+    return_type: str = "",
+    style: SignatureStyle = PYTHON_STYLE,
+) -> str:
+    """Massage a captured desc signature into a domain-styled declaration."""
     sig = sig.strip()
+    if not style.py_decorators:
+        return decorate_foreign_signature(sig, desctype, return_type, style)
     if desctype in {"function", "method", "staticmethod", "classmethod"}:
         if sig.startswith("async "):
             sig = "async def " + sig[len("async ") :]
@@ -49,6 +150,44 @@ def decorate_signature(sig: str, desctype: str, return_type: str = "") -> str:
             sig = "def " + sig
         if return_type and " -> " not in sig:
             sig = f"{sig} -> {return_type}"
+    return sig
+
+
+def decorate_foreign_signature(
+    sig: str,
+    desctype: str,
+    return_type: str,
+    style: SignatureStyle,
+) -> str:
+    """Prefix a non-Python signature per its domain style.
+
+    The captured signature text is kept as-is (domains like C/C++ already
+    embed parameter and return types); only the declaration keyword, the
+    async marker, and the documented return type are layered on top —
+    and only when the style defines them.
+    """
+    sig = sig.strip()
+    is_async = False
+    if sig.startswith("async "):
+        is_async = True
+        sig = sig[len("async ") :].lstrip()
+    is_class = desctype in {"class", "exception"}
+    if is_class:
+        keyword = style.class_kw
+    elif desctype == "function":
+        keyword = style.function_kw
+    elif desctype in {"method", "staticmethod", "classmethod"}:
+        keyword = style.method_kw
+    else:
+        keyword = ""
+    if keyword and not sig.startswith(keyword):
+        sig = keyword + sig
+    if is_async and style.async_kw:
+        sig = style.async_kw + sig
+    if return_type and style.returns and not is_class:
+        suffix = style.returns.format(t=return_type)
+        if not sig.endswith(suffix):
+            sig = sig + suffix
     return sig
 
 
@@ -148,8 +287,19 @@ def build_clean_signature(
     desctype: str,
     short_name: str,
     return_type: str = "",
+    style: SignatureStyle = PYTHON_STYLE,
 ) -> str:
-    """Reconstruct a parameter-name-only signature with decorators."""
+    """Reconstruct a domain-styled signature for a ``desc_signature``.
+
+    Python keeps the historical parameter-name-only reconstruction with
+    ``@classmethod``/``@staticmethod``/``@property`` decorators. Other
+    domains keep the signature text Sphinx produced (types included) and
+    only get keyword/async/return decoration per their style.
+    """
+    if not style.py_decorators:
+        text = " ".join(signature.astext().split())
+        return decorate_foreign_signature(text, desctype, return_type, style)
+
     full_name, annotation, has_paramlist, inline_return = _collect_signature_metadata(
         signature, short_name
     )
@@ -168,13 +318,17 @@ def build_clean_signature(
     return full_name
 
 
-def format_desc_label(desctype: str, short_name: str) -> str:
+def format_desc_label(
+    desctype: str,
+    short_name: str,
+    style: SignatureStyle = PYTHON_STYLE,
+) -> str:
     """Return the heading label for a desc node, with type prefix when useful."""
     if not short_name:
         return desctype or "object"
     if desctype == "class":
         return f"`class {short_name}`"
-    if desctype == "exception":
+    if desctype == "exception" and style.py_decorators:
         return f"`exception {short_name}`"
     if desctype in {"function", "method", "staticmethod", "classmethod"}:
         return f"`{short_name}()`"
