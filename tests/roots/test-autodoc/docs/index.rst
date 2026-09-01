@@ -24,5 +24,8 @@ API
 
 .. autoclass:: example.Greeter
    :members:
+   :undoc-members:
 
 .. autofunction:: example.add
+
+.. autofunction:: example.operations.parse_check_image_file

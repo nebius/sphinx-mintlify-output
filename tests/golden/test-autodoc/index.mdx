@@ -23,7 +23,12 @@ add(1, 2)
 ## `class Greeter`
 
 ```python
-class example.Greeter(name, polite)
+from example import Greeter
+
+class Greeter(name, polite):
+    category: Category
+    product: Product
+    schema_version: ClassVar[str]
 ```
 
 A friendly greeter.
@@ -56,6 +61,9 @@ Active category.
 Current product.
 </ResponseField>
 
+<a id="example.Greeter.schema_version"></a>
+<ResponseField name="schema_version" type="ClassVar[str]" />
+
 ### Methods
 
 <a id="example.Greeter.greet"></a>
@@ -87,7 +95,10 @@ A greeting string.
 ## `add()`
 
 ```python
-def example.add(a, b) -> int
+from example import add
+
+
+def add(a, b) -> int
 ```
 
 Add two integers.
@@ -102,4 +113,25 @@ Second number.
 
 <ResponseField name="returns">
 The sum.
+</ResponseField>
+
+<a id="example.operations.parse_check_image_file"></a>
+
+## `parse_check_image_file()`
+
+```python
+from example.operations import parse_check_image_file
+
+
+def parse_check_image_file(response) -> bool
+```
+
+Parse an image-file check response.
+
+<ParamField path="response" type="object" required>
+Response to parse.
+</ParamField>
+
+<ResponseField name="returns">
+Whether the image-file check passed.
 </ResponseField>

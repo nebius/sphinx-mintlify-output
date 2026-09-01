@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from example.catalog.category import Category
 from example.catalog.product import Product
 
@@ -18,6 +20,7 @@ class Greeter:
     """Current product."""
     category: Category
     """Active category."""
+    schema_version: ClassVar[str]
 
     def __init__(self, name: str, polite: bool = True) -> None:
         self.name = name
