@@ -71,6 +71,20 @@ def test_method_signature(autodoc_app) -> None:
     assert "def greet(target) -> str" in text
 
 
+def test_exception_signature(autodoc_app) -> None:
+    autodoc_app.build()
+    text = (Path(autodoc_app.outdir) / "index.mdx").read_text("utf-8")
+    assert "## `exception ExampleError`" in text
+    assert (
+        "```python\n"
+        "from example import ExampleError\n\n"
+        "class ExampleError(message):\n"
+        "    ...\n"
+        "```" in text
+    )
+    assert "exception example.ExampleError(message)" not in text
+
+
 def test_function_signature_and_anchor(autodoc_app) -> None:
     autodoc_app.build()
     text = (Path(autodoc_app.outdir) / "index.mdx").read_text("utf-8")
@@ -112,6 +126,13 @@ def test_function_import_when_module_names_hidden(
         "    category: Category\n"
         "    product: Product\n"
         "    schema_version: ClassVar[str]\n"
+        "```" in text
+    )
+    assert (
+        "```python\n"
+        "from example import ExampleError\n\n"
+        "class ExampleError(message):\n"
+        "    ...\n"
         "```" in text
     )
     assert '<ResponseField name="schema_version" type="ClassVar[str]" />' in text

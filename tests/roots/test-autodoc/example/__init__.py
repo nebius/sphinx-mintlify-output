@@ -38,6 +38,13 @@ class Greeter:
         return f"Hello, {target}!"
 
 
+class ExampleError(Exception):
+    """An example API error."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+
 def add(a: int, b: int) -> int:
     """Add two integers.
 

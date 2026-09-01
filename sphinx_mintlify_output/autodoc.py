@@ -389,7 +389,7 @@ def build_clean_signature(
 
     module_name = _python_module_name(signature, full_name, short_name)
 
-    if desctype == "class":
+    if desctype in {"class", "exception"}:
         class_name = short_name if module_name else full_name
         class_sig = _build_python_class_signature(
             class_name,
@@ -399,8 +399,6 @@ def build_clean_signature(
         if module_name:
             return f"from {module_name} import {short_name}\n\n{class_sig}"
         return class_sig
-    if desctype == "exception":
-        return _build_class_signature(desctype, full_name, param_names)
     if desctype == "function":
         if module_name:
             callable_sig = _build_callable_signature(
