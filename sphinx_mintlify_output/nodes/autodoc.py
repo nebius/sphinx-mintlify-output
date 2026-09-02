@@ -13,6 +13,7 @@ from docutils import nodes
 from sphinx_mintlify_output.autodoc import (
     PARAM_DASH_SEPARATORS,
     build_clean_signature,
+    desc_annotation_type,
     desc_short_name,
     extract_param_info,
     format_desc_label,
@@ -250,13 +251,7 @@ def _render_desc_as_field(host: TranslationNode, node: nodes.Element) -> str:
         return ""
 
     short_name = desc_short_name(signature)
-    type_str = ""
-    for child in signature.children:
-        if isinstance(child, addnodes.desc_annotation):
-            text = child.astext()
-            if text.startswith(": "):
-                type_str = text[2:].strip()
-                break
+    type_str = desc_annotation_type(signature)
 
     out: list[str] = []
     if host.ctx.builder.config.mintlify_emit_anchors:

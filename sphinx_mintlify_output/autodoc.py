@@ -248,6 +248,67 @@ def _build_class_signature(
     return f"{desctype} {full_name}({', '.join(param_names)})"
 
 
+def desc_annotation_type(signature: nodes.Element) -> str:
+    """Return the type from a Python attribute signature annotation."""
+    from sphinx import addnodes
+
+    for child in signature.children:
+        if not isinstance(child, addnodes.desc_annotation):
+            continue
+        text = str(child.astext()).strip()
+        if text.startswith(":"):
+            return text[1:].strip()
+    return ""
+
+
+def _collect_class_attributes(signature: nodes.Element) -> list[tuple[str, str]]:
+    """Collect direct class attributes as ``(name, type)`` pairs."""
+    from sphinx import addnodes
+
+    parent = signature.parent
+    if not isinstance(parent, nodes.Element):
+        return []
+    attributes: list[tuple[str, str]] = []
+    for content in parent.children:
+        if not isinstance(content, addnodes.desc_content):
+            continue
+        for member in content.children:
+            if not isinstance(member, addnodes.desc):
+                continue
+            if member.get("desctype") not in {"attribute", "data"}:
+                continue
+            member_signature = next(
+                (
+                    child
+                    for child in member.children
+                    if isinstance(child, addnodes.desc_signature)
+                ),
+                None,
+            )
+            if member_signature is None:
+                continue
+            name = desc_short_name(member_signature)
+            if name:
+                attributes.append((name, desc_annotation_type(member_signature)))
+        break
+    return attributes
+
+
+def _build_python_class_signature(
+    full_name: str,
+    param_names: list[str],
+    attributes: list[tuple[str, str]],
+) -> str:
+    header = _build_class_signature("class", full_name, param_names) + ":"
+    if not attributes:
+        return f"{header}\n    ..."
+    declarations = [
+        f"    {name}: {type_str}" if type_str else f"    {name} = ..."
+        for name, type_str in attributes
+    ]
+    return "\n".join([header, *declarations])
+
+
 def _build_callable_signature(
     desctype: str,
     full_name: str,
@@ -282,6 +343,25 @@ def _build_property_signature(full_name: str, return_type: str) -> str:
     return body
 
 
+def _python_module_name(
+    signature: nodes.Element,
+    full_name: str,
+    short_name: str,
+) -> str:
+    """Return the importable module for a qualified Python object."""
+    module_name = str(signature.get("module") or "").strip()
+    if module_name:
+        return module_name
+    display_module, separator, object_name = full_name.rpartition(".")
+    if separator and object_name == short_name:
+        return display_module
+    return ""
+
+
+def _prepend_python_import(module_name: str, name: str, declaration: str) -> str:
+    return f"from {module_name} import {name}\n\n\n{declaration}"
+
+
 def build_clean_signature(
     signature: nodes.Element,
     desctype: str,
@@ -307,9 +387,28 @@ def build_clean_signature(
         return_type = inline_return
     param_names = _collect_param_names(signature) if has_paramlist else []
 
+    module_name = _python_module_name(signature, full_name, short_name)
+
     if desctype in {"class", "exception"}:
-        return _build_class_signature(desctype, full_name, param_names)
-    if desctype in {"function", "method", "staticmethod", "classmethod"}:
+        class_name = short_name if module_name else full_name
+        class_sig = _build_python_class_signature(
+            class_name,
+            param_names,
+            _collect_class_attributes(signature),
+        )
+        if module_name:
+            return f"from {module_name} import {short_name}\n\n{class_sig}"
+        return class_sig
+    if desctype == "function":
+        if module_name:
+            callable_sig = _build_callable_signature(
+                desctype, short_name, annotation, param_names, return_type
+            )
+            return _prepend_python_import(module_name, short_name, callable_sig)
+        return _build_callable_signature(
+            desctype, full_name, annotation, param_names, return_type
+        )
+    if desctype in {"method", "staticmethod", "classmethod"}:
         return _build_callable_signature(
             desctype, full_name, annotation, param_names, return_type
         )

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from example.catalog.category import Category
 from example.catalog.product import Product
 
@@ -18,6 +20,7 @@ class Greeter:
     """Current product."""
     category: Category
     """Active category."""
+    schema_version: ClassVar[str]
 
     def __init__(self, name: str, polite: bool = True) -> None:
         self.name = name
@@ -33,6 +36,13 @@ class Greeter:
         if not target:
             raise ValueError("empty target")
         return f"Hello, {target}!"
+
+
+class ExampleError(Exception):
+    """An example API error."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
 
 
 def add(a: int, b: int) -> int:

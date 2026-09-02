@@ -24,5 +24,10 @@ API
 
 .. autoclass:: example.Greeter
    :members:
+   :undoc-members:
+
+.. autoexception:: example.ExampleError
 
 .. autofunction:: example.add
+
+.. autofunction:: example.operations.parse_check_image_file
